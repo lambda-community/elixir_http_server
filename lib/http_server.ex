@@ -24,11 +24,15 @@ defmodule HttpServer do
     case :gen_tcp.accept(socket) do
       {:ok, client} ->
         IO.puts "Entro un cliente"
-
+        :gen_tcp.send(client, "Salio el cliente")
       _ ->
         IO.puts "Error"
     end
 
     loop_accept_clients(socket)
+  end
+
+  def read(socket) do
+    :gen_tcp.recv(socket, _)
   end
 end
