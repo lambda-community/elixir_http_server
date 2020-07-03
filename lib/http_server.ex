@@ -15,25 +15,30 @@ defmodule HttpServer do
   end
 
   def serve(client) do
-    data = read(client)
+    data = read(client, %Connection{})
     IO.puts "================"
     IO.inspect data
-#    respond(client, data)
+    # TODO: respond(client, data)
     serve(client)
   end
 
-  def read(client) do
-    IO.inspect(:gen_tcp.recv(client, 0))
-    case :gen_tcp.recv(client, 0) do
+  def read(client, connection) do
+
+    received = :gen_tcp.recv(client, 0)
+    IO.inspect(received)
+
+    case received do
       {:ok, {:http_request, method, _, _} } ->
-        %Connection{method: method}
-        read(client)
+        conn = %Connection{connection | method: method}
+        read(client, conn)
+
       {:ok, {:http_header, _, header_name, _, header_value}} ->
-        IO.puts "Ya"
-        %Connection{headers: %{header_name => header_value}}
-        read(client)
-      _ ->
-        IO.puts("Error")
+        conn = %Connection{connection | headers: Map.put(connection.headers, header_name, header_value)}
+        read(client, conn)
+
+      {:ok :http_eoh} ->
+        # TODO: Read the response
+        connection
     end
 
   end

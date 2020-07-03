@@ -1,3 +1,3 @@
 defmodule Connection do
-  defstruct method: nil, headers: nil
+  defstruct method: nil, headers: %{}
 end
