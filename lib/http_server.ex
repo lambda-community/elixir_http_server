@@ -2,7 +2,7 @@ require Logger
 
 defmodule HttpServer do
   def listen do
-    {:ok, socket } = :gen_tcp.listen(8080, [:binary, packet: :line, active: false, reuseaddr: true])
+    {:ok, socket } = :gen_tcp.listen(8080, [:binary, packet: :http, active: false, reuseaddr: true])
     Logger.info "Listening in 8080"
     loop_accept_clients(socket)
   end
@@ -16,6 +16,8 @@ defmodule HttpServer do
 
   def serve(client) do
     data = read(client)
+    IO.puts "9999999999999999"
+    IO.inspect data
     respond(client, data)
     serve(client)
   end
