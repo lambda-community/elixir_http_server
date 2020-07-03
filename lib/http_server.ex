@@ -23,13 +23,15 @@ defmodule HttpServer do
   end
 
   def read(client) do
+    IO.inspect(:gen_tcp.recv(client, 0))
     case :gen_tcp.recv(client, 0) do
-      {:http_request, method, _, _} ->
+      {:ok, {:http_request, method, _, _} } ->
         %Connection{method: method}
         read(client)
-      {:http_header, _, header_name, _, header_value} ->
+      {:ok, {:http_header, _, header_name, _, header_value}} ->
         IO.puts "Ya"
-
+        %Connection{headers: %{header_name => header_value}}
+        read(client)
       _ ->
         IO.puts("Error")
     end
