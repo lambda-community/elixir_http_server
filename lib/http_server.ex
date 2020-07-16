@@ -36,9 +36,14 @@ defmodule HttpServer do
         conn = %Connection{connection | headers: Map.put(connection.headers, header_name, header_value)}
         read(client, conn)
 
-      {:ok :http_eoh} ->
-        # TODO: Read the response
-        connection
+      {:ok, :http_eoh} ->
+        :inet.setopts(client, [packet: :raw])
+        case :gen_tcp.recv(client, 0) do
+          {:ok, body} ->
+            %Connection{connection | request_body: body}
+          _ ->
+            connection
+        end
     end
 
   end
