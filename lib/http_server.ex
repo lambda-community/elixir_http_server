@@ -15,19 +15,17 @@ defmodule HttpServer do
   end
 
   def serve(client) do
-    data = read(client, %Connection{})
+    connection = read(client, %Connection{})
     IO.puts "================"
-    IO.inspect data
-    # TODO: respond(client, data)
-    serve(client)
+    IO.inspect connection
+    IO.puts "================"
+
+    respond(client, connection)
+    :gen_tcp.close(client)
   end
 
   def read(client, connection) do
-
-    received = :gen_tcp.recv(client, 0)
-    IO.inspect(received)
-
-    case received do
+    case :gen_tcp.recv(client, 0) do
       {:ok, {:http_request, method, _, _} } ->
         conn = %Connection{connection | method: method}
         read(client, conn)
@@ -41,14 +39,14 @@ defmodule HttpServer do
         case :gen_tcp.recv(client, 0) do
           {:ok, body} ->
             %Connection{connection | request_body: body}
+
           _ ->
             connection
         end
     end
-
   end
 
-  def respond(client, data) do
-    :gen_tcp.send(client, data)
+  def respond(client, connection) do
+    :gen_tcp.send(client, connection.request_body)
   end
 end
