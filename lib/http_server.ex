@@ -47,6 +47,11 @@ defmodule HttpServer do
   end
 
   def respond(client, connection) do
-    :gen_tcp.send(client, connection.request_body)
+    response_body = """
+    HTTP/1.1 200 ok
+
+    #{connection.request_body}
+    """
+    :gen_tcp.send(client, response_body)
   end
 end
