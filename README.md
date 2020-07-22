@@ -1,8 +1,8 @@
-# HttpServer
+# HttpServer Lambda Community
 
 **TODO: Add description**
 
-## Installation
+## Installation 
 
 If [available in Hex](https://hex.pm/docs/publish), the package can be installed
 by adding `http_server` to your list of dependencies in `mix.exs`:
