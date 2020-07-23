@@ -2,6 +2,7 @@
 defmodule HttpServer do
   require Logger
   require Plug.ContentType
+  require Plug.Response
 
   def listen do
     {:ok, socket } = :gen_tcp.listen(8080, [:binary, packet: :http_bin, active: false, reuseaddr: true])
@@ -24,8 +25,10 @@ defmodule HttpServer do
 
     connection
       |> Plug.ContentType.transform
+      |> Plug.Response.transform
       |> respond(client)
       |> :gen_tcp.close
+
   end
 
   defp read(client, connection) do
@@ -54,7 +57,7 @@ defmodule HttpServer do
     response_body = """
     HTTP/1.1 200 ok
 
-    #{connection.request_body}
+    #{connection.response_body}
     """
     :gen_tcp.send(client, response_body)
     client
