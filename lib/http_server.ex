@@ -1,30 +1,34 @@
-require Logger
 
 defmodule HttpServer do
+  require Logger
+  require Plug.ContentType
+
   def listen do
     {:ok, socket } = :gen_tcp.listen(8080, [:binary, packet: :http_bin, active: false, reuseaddr: true])
     Logger.info "Listening in 8080"
     loop_accept_clients(socket)
   end
 
-  def loop_accept_clients(socket) do
+  defp loop_accept_clients(socket) do
     {:ok, client} = :gen_tcp.accept(socket)
     pid = spawn fn -> serve(client) end
     Logger.info("Handling client in process: #{inspect pid}")
     loop_accept_clients(socket)
   end
 
-  def serve(client) do
+  defp serve(client) do
     connection = read(client, %Connection{})
     IO.puts "================"
     IO.inspect connection
     IO.puts "================"
 
-    respond(client, connection)
-    :gen_tcp.close(client)
+    connection
+      |> Plug.ContentType.transform
+      |> respond(client)
+      |> :gen_tcp.close
   end
 
-  def read(client, connection) do
+  defp read(client, connection) do
     case :gen_tcp.recv(client, 0) do
       {:ok, {:http_request, method, _, _} } ->
         conn = %Connection{connection | method: method}
@@ -46,12 +50,13 @@ defmodule HttpServer do
     end
   end
 
-  def respond(client, connection) do
+  defp respond(connection, client) do
     response_body = """
     HTTP/1.1 200 ok
 
     #{connection.request_body}
     """
     :gen_tcp.send(client, response_body)
+    client
   end
 end
